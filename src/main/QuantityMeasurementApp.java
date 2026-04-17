@@ -1,9 +1,11 @@
 public class QuantityMeasurementApp {
 
-    // Enum for units
+    // Enum for units (base: FEET)
     public enum LengthUnit {
         FEET(1.0),
-        INCH(1.0 / 12.0); // 1 inch = 1/12 feet
+        INCH(1.0 / 12.0),        // 1 inch = 1/12 feet
+        YARDS(3.0),              // 1 yard = 3 feet
+        CENTIMETERS(0.0328084);  // 1 cm = 0.0328084 feet (converted from inches)
 
         private final double conversionFactorToFeet;
 
@@ -16,7 +18,7 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // Generic Quantity class
+    // Generic Quantity class (unchanged)
     public static class Quantity {
         private final double value;
         private final LengthUnit unit;
@@ -29,7 +31,6 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
-        // Convert to base unit (feet)
         private double toFeet() {
             return unit.toFeet(value);
         }
@@ -43,7 +44,6 @@ public class QuantityMeasurementApp {
 
             Quantity other = (Quantity) obj;
 
-            // Compare after converting both to feet
             return Double.compare(this.toFeet(), other.toFeet()) == 0;
         }
     }
@@ -51,8 +51,8 @@ public class QuantityMeasurementApp {
     // Main method (demo)
     public static void main(String[] args) {
 
-        Quantity q1 = new Quantity(1.0, LengthUnit.FEET);
-        Quantity q2 = new Quantity(12.0, LengthUnit.INCH);
+        Quantity q1 = new Quantity(1.0, LengthUnit.YARDS);
+        Quantity q2 = new Quantity(3.0, LengthUnit.FEET);
 
         System.out.println("Are equal: " + q1.equals(q2)); // true
     }
