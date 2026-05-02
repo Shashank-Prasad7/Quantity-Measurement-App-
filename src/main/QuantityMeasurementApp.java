@@ -58,6 +58,18 @@ public class QuantityMeasurementApp {
             return new Quantity(valueInCurrentUnit, this.unit);
         }
 
+        public Quantity add(Quantity other, LengthUnit targetUnit) {
+            if (other == null) {
+                throw new IllegalArgumentException("Quantity cannot be null");
+            }
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+            double sumInFeet = this.toFeet() + other.toFeet();
+            double valueInTargetUnit = targetUnit.fromFeet(sumInFeet);
+            return new Quantity(valueInTargetUnit, targetUnit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
@@ -85,6 +97,13 @@ public class QuantityMeasurementApp {
             throw new IllegalArgumentException("Quantities cannot be null");
         }
         return first.add(second);
+    }
+
+    public static Quantity add(Quantity first, Quantity second, LengthUnit targetUnit) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Quantities cannot be null");
+        }
+        return first.add(second, targetUnit);
     }
 
     private static void validateFinite(double value) {

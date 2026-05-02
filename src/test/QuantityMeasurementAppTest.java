@@ -228,4 +228,52 @@ public class QuantityMeasurementAppTest {
         var first = new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET);
         assertThrows(IllegalArgumentException.class, () -> QuantityMeasurementApp.add(first, null));
     }
+
+    @Test
+    void testAddition_WithTargetUnit_FeetPlusInches_ToYards() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.Quantity(12.0, QuantityMeasurementApp.LengthUnit.INCH),
+                QuantityMeasurementApp.LengthUnit.YARDS
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(2.0 / 3.0, QuantityMeasurementApp.LengthUnit.YARDS), result);
+    }
+
+    @Test
+    void testAddition_WithTargetUnit_YardsPlusFeet_ToInches() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.YARDS),
+                new QuantityMeasurementApp.Quantity(3.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.INCH
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(72.0, QuantityMeasurementApp.LengthUnit.INCH), result);
+    }
+
+    @Test
+    void testAddition_WithTargetUnit_CentimetersAndInches_ToCentimeters() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(2.54, QuantityMeasurementApp.LengthUnit.CENTIMETERS),
+                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.INCH),
+                QuantityMeasurementApp.LengthUnit.CENTIMETERS
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(5.08, QuantityMeasurementApp.LengthUnit.CENTIMETERS), result);
+    }
+
+    @Test
+    void testAddition_WithTargetUnit_CommutativityInSameTarget() {
+        var first = new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET);
+        var second = new QuantityMeasurementApp.Quantity(12.0, QuantityMeasurementApp.LengthUnit.INCH);
+
+        var aPlusB = QuantityMeasurementApp.add(first, second, QuantityMeasurementApp.LengthUnit.FEET);
+        var bPlusA = QuantityMeasurementApp.add(second, first, QuantityMeasurementApp.LengthUnit.FEET);
+
+        assertEquals(aPlusB, bPlusA);
+    }
+
+    @Test
+    void testAddition_WithTargetUnit_NullTarget_Throws() {
+        var first = new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET);
+        var second = new QuantityMeasurementApp.Quantity(12.0, QuantityMeasurementApp.LengthUnit.INCH);
+        assertThrows(IllegalArgumentException.class, () -> QuantityMeasurementApp.add(first, second, null));
+    }
 }
