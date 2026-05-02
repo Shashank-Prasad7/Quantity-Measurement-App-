@@ -1,4 +1,5 @@
 public class QuantityMeasurementApp {
+    private static final double EPSILON = 1e-6;
 
     // Enum for units (base: FEET)
     public enum LengthUnit {
@@ -16,6 +17,10 @@ public class QuantityMeasurementApp {
         public double toFeet(double value) {
             return value * conversionFactorToFeet;
         }
+
+        public double fromFeet(double feetValue) {
+            return feetValue / conversionFactorToFeet;
+        }
     }
 
     // Generic Quantity class (unchanged)
@@ -24,6 +29,7 @@ public class QuantityMeasurementApp {
         private final LengthUnit unit;
 
         public Quantity(double value, LengthUnit unit) {
+            validateFinite(value);
             if (unit == null) {
                 throw new IllegalArgumentException("Unit cannot be null");
             }
@@ -35,6 +41,14 @@ public class QuantityMeasurementApp {
             return unit.toFeet(value);
         }
 
+        public Quantity convertTo(LengthUnit targetUnit) {
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+            double convertedValue = targetUnit.fromFeet(this.toFeet());
+            return new Quantity(convertedValue, targetUnit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
@@ -44,7 +58,22 @@ public class QuantityMeasurementApp {
 
             Quantity other = (Quantity) obj;
 
-            return Double.compare(this.toFeet(), other.toFeet()) == 0;
+            return Math.abs(this.toFeet() - other.toFeet()) <= EPSILON;
+        }
+    }
+
+    public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
+        validateFinite(value);
+        if (sourceUnit == null || targetUnit == null) {
+            throw new IllegalArgumentException("Units cannot be null");
+        }
+        double baseInFeet = sourceUnit.toFeet(value);
+        return targetUnit.fromFeet(baseInFeet);
+    }
+
+    private static void validateFinite(double value) {
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Value must be finite");
         }
     }
 
