@@ -19,6 +19,26 @@ enum LengthUnit {
     }
 }
 
+enum WeightUnit {
+    KILOGRAM(1.0),
+    GRAM(0.001),
+    POUND(0.453592);
+
+    private final double conversionFactorToKilogram;
+
+    WeightUnit(double factor) {
+        this.conversionFactorToKilogram = factor;
+    }
+
+    public double toKilogram(double value) {
+        return value * conversionFactorToKilogram;
+    }
+
+    public double fromKilogram(double kilogramValue) {
+        return kilogramValue / conversionFactorToKilogram;
+    }
+}
+
 public class QuantityMeasurementApp {
     private static final double EPSILON = 1e-6;
 
@@ -82,6 +102,66 @@ public class QuantityMeasurementApp {
         }
     }
 
+    public static class QuantityWeight {
+        private final double value;
+        private final WeightUnit unit;
+
+        public QuantityWeight(double value, WeightUnit unit) {
+            validateFinite(value);
+            if (unit == null) {
+                throw new IllegalArgumentException("Unit cannot be null");
+            }
+            this.value = value;
+            this.unit = unit;
+        }
+
+        private double toKilogram() {
+            return unit.toKilogram(value);
+        }
+
+        public QuantityWeight convertTo(WeightUnit targetUnit) {
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+            double convertedValue = targetUnit.fromKilogram(this.toKilogram());
+            return new QuantityWeight(convertedValue, targetUnit);
+        }
+
+        public QuantityWeight add(QuantityWeight other) {
+            if (other == null) {
+                throw new IllegalArgumentException("Quantity cannot be null");
+            }
+            double sumInKilogram = this.toKilogram() + other.toKilogram();
+            double valueInCurrentUnit = this.unit.fromKilogram(sumInKilogram);
+            return new QuantityWeight(valueInCurrentUnit, this.unit);
+        }
+
+        public QuantityWeight add(QuantityWeight other, WeightUnit targetUnit) {
+            if (other == null) {
+                throw new IllegalArgumentException("Quantity cannot be null");
+            }
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+            double sumInKilogram = this.toKilogram() + other.toKilogram();
+            double valueInTargetUnit = targetUnit.fromKilogram(sumInKilogram);
+            return new QuantityWeight(valueInTargetUnit, targetUnit);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            QuantityWeight other = (QuantityWeight) obj;
+            return Math.abs(this.toKilogram() - other.toKilogram()) <= EPSILON;
+        }
+
+        @Override
+        public int hashCode() {
+            return Double.hashCode(Math.round(this.toKilogram() / EPSILON) * EPSILON);
+        }
+    }
+
     public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
         validateFinite(value);
         if (sourceUnit == null || targetUnit == null) {
@@ -99,6 +179,20 @@ public class QuantityMeasurementApp {
     }
 
     public static Quantity add(Quantity first, Quantity second, LengthUnit targetUnit) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Quantities cannot be null");
+        }
+        return first.add(second, targetUnit);
+    }
+
+    public static QuantityWeight add(QuantityWeight first, QuantityWeight second) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Quantities cannot be null");
+        }
+        return first.add(second);
+    }
+
+    public static QuantityWeight add(QuantityWeight first, QuantityWeight second, WeightUnit targetUnit) {
         if (first == null || second == null) {
             throw new IllegalArgumentException("Quantities cannot be null");
         }
