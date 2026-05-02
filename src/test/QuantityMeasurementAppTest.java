@@ -177,4 +177,55 @@ public class QuantityMeasurementAppTest {
         assertThrows(IllegalArgumentException.class, () ->
                 QuantityMeasurementApp.convert(Double.POSITIVE_INFINITY, QuantityMeasurementApp.LengthUnit.FEET, QuantityMeasurementApp.LengthUnit.INCH));
     }
+
+    @Test
+    void testAddition_SameUnit_FeetPlusFeet() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.Quantity(2.0, QuantityMeasurementApp.LengthUnit.FEET)
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(3.0, QuantityMeasurementApp.LengthUnit.FEET), result);
+    }
+
+    @Test
+    void testAddition_SameUnit_InchPlusInch() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(6.0, QuantityMeasurementApp.LengthUnit.INCH),
+                new QuantityMeasurementApp.Quantity(6.0, QuantityMeasurementApp.LengthUnit.INCH)
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(12.0, QuantityMeasurementApp.LengthUnit.INCH), result);
+    }
+
+    @Test
+    void testAddition_CrossUnit_FeetPlusInches() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.Quantity(12.0, QuantityMeasurementApp.LengthUnit.INCH)
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(2.0, QuantityMeasurementApp.LengthUnit.FEET), result);
+    }
+
+    @Test
+    void testAddition_IdentityWithZero() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(5.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.Quantity(0.0, QuantityMeasurementApp.LengthUnit.INCH)
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(5.0, QuantityMeasurementApp.LengthUnit.FEET), result);
+    }
+
+    @Test
+    void testAddition_WithNegativeValue() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.Quantity(5.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.Quantity(-2.0, QuantityMeasurementApp.LengthUnit.FEET)
+        );
+        assertEquals(new QuantityMeasurementApp.Quantity(3.0, QuantityMeasurementApp.LengthUnit.FEET), result);
+    }
+
+    @Test
+    void testAddition_NullQuantity_Throws() {
+        var first = new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.LengthUnit.FEET);
+        assertThrows(IllegalArgumentException.class, () -> QuantityMeasurementApp.add(first, null));
+    }
 }
