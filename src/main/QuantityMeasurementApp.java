@@ -1,27 +1,26 @@
+enum LengthUnit {
+    FEET(1.0),
+    INCH(1.0 / 12.0),        // 1 inch = 1/12 feet
+    YARDS(3.0),              // 1 yard = 3 feet
+    CENTIMETERS(0.0328084);  // 1 cm = 0.0328084 feet (converted from inches)
+
+    private final double conversionFactorToFeet;
+
+    LengthUnit(double factor) {
+        this.conversionFactorToFeet = factor;
+    }
+
+    public double toFeet(double value) {
+        return value * conversionFactorToFeet;
+    }
+
+    public double fromFeet(double feetValue) {
+        return feetValue / conversionFactorToFeet;
+    }
+}
+
 public class QuantityMeasurementApp {
     private static final double EPSILON = 1e-6;
-
-    // Enum for units (base: FEET)
-    public enum LengthUnit {
-        FEET(1.0),
-        INCH(1.0 / 12.0),        // 1 inch = 1/12 feet
-        YARDS(3.0),              // 1 yard = 3 feet
-        CENTIMETERS(0.0328084);  // 1 cm = 0.0328084 feet (converted from inches)
-
-        private final double conversionFactorToFeet;
-
-        LengthUnit(double factor) {
-            this.conversionFactorToFeet = factor;
-        }
-
-        public double toFeet(double value) {
-            return value * conversionFactorToFeet;
-        }
-
-        public double fromFeet(double feetValue) {
-            return feetValue / conversionFactorToFeet;
-        }
-    }
 
     // Generic Quantity class (unchanged)
     public static class Quantity {
@@ -58,6 +57,18 @@ public class QuantityMeasurementApp {
             return new Quantity(valueInCurrentUnit, this.unit);
         }
 
+        public Quantity add(Quantity other, LengthUnit targetUnit) {
+            if (other == null) {
+                throw new IllegalArgumentException("Quantity cannot be null");
+            }
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+            double sumInFeet = this.toFeet() + other.toFeet();
+            double valueInTargetUnit = targetUnit.fromFeet(sumInFeet);
+            return new Quantity(valueInTargetUnit, targetUnit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
@@ -85,6 +96,13 @@ public class QuantityMeasurementApp {
             throw new IllegalArgumentException("Quantities cannot be null");
         }
         return first.add(second);
+    }
+
+    public static Quantity add(Quantity first, Quantity second, LengthUnit targetUnit) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Quantities cannot be null");
+        }
+        return first.add(second, targetUnit);
     }
 
     private static void validateFinite(double value) {
