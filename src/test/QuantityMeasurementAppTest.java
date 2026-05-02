@@ -294,4 +294,64 @@ public class QuantityMeasurementAppTest {
         double result = QuantityMeasurementApp.convert(1.0, LengthUnit.FEET, LengthUnit.INCH);
         assertEquals(12.0, result, EPSILON);
     }
+
+    @Test
+    void testWeightEquality_KilogramToGram_EquivalentValue() {
+        var kg = new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        var gram = new QuantityMeasurementApp.QuantityWeight(1000.0, WeightUnit.GRAM);
+        assertEquals(kg, gram);
+    }
+
+    @Test
+    void testWeightEquality_PoundToGram_EquivalentValue() {
+        var pound = new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.POUND);
+        var gram = new QuantityMeasurementApp.QuantityWeight(453.592, WeightUnit.GRAM);
+        assertEquals(pound, gram);
+    }
+
+    @Test
+    void testWeightConversion_KilogramToPound() {
+        var kg = new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        var pound = kg.convertTo(WeightUnit.POUND);
+        assertEquals(new QuantityMeasurementApp.QuantityWeight(2.2046244201837775, WeightUnit.POUND), pound);
+    }
+
+    @Test
+    void testWeightConversion_RoundTrip_PreservesValue() {
+        var original = new QuantityMeasurementApp.QuantityWeight(1.5, WeightUnit.KILOGRAM);
+        var roundTrip = original.convertTo(WeightUnit.GRAM).convertTo(WeightUnit.KILOGRAM);
+        assertEquals(original, roundTrip);
+    }
+
+    @Test
+    void testWeightAddition_CrossUnit_KilogramPlusGram() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                new QuantityMeasurementApp.QuantityWeight(1000.0, WeightUnit.GRAM)
+        );
+        assertEquals(new QuantityMeasurementApp.QuantityWeight(2.0, WeightUnit.KILOGRAM), result);
+    }
+
+    @Test
+    void testWeightAddition_ExplicitTarget_Gram() {
+        var result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                new QuantityMeasurementApp.QuantityWeight(1000.0, WeightUnit.GRAM),
+                WeightUnit.GRAM
+        );
+        assertEquals(new QuantityMeasurementApp.QuantityWeight(2000.0, WeightUnit.GRAM), result);
+    }
+
+    @Test
+    void testWeightVsLength_IncompatibleComparison() {
+        var length = new QuantityMeasurementApp.Quantity(1.0, LengthUnit.FEET);
+        var weight = new QuantityMeasurementApp.QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        assertEquals(false, weight.equals(length));
+    }
+
+    @Test
+    void testWeight_NullUnit_Throws() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new QuantityMeasurementApp.QuantityWeight(1.0, null));
+    }
 }
